@@ -4,4 +4,6 @@ cifar/
 .idea/
 .vscode/
 node_modules
+temp
+log
 

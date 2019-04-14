@@ -4,14 +4,7 @@ import numpy as np
 from utils import load_h5, load_labels, KerasModel, separate_data_by_class, generate_client_datasets
 import os
 import tensorflow as tf
-import tensorflow_federated as tff
 from tensorflow.python.keras.optimizer_v2 import adam
-
-tf.compat.v1.enable_v2_behavior()
-config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.4
-config.gpu_options.allow_growth = True
-tf.enable_eager_execution(config=config)
 
 nest = tf.contrib.framework.nest
 
