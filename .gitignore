@@ -1,1 +1,7 @@
 cifar/
+.vscode
+.ipynb_checkpoints
+.idea/
+.vscode/
+node_modules
+
