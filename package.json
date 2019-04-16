@@ -6,8 +6,7 @@
   "scripts": {
     "start": "tsc && node dist/simulator.js",
     "build": "tsc",
-    "deploy": "yarn install && tsc && pm2 start",
-    "postinstall": "conda env update -f=env.yml"
+    "deploy": "yarn install && tsc && pm2 start"
   },
   "repository": {
     "type": "git",

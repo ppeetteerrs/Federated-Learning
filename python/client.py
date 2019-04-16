@@ -3,9 +3,13 @@ from utils import load_dataset, load_dummy
 from random import sample
 import argparse
 import os
-import sys
+import pickle
 import json
 import tensorflow as tf
+import sys
+tf.config.gpu.set_per_process_memory_fraction(0.4)
+tf.config.gpu.set_per_process_memory_growth(True)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 parser = argparse.ArgumentParser(description="Parse Client Arguments")
 parser.add_argument("-i", "--id", metavar='Client ID', type=int, nargs="?",
@@ -14,6 +18,8 @@ parser.add_argument("-w", "--weights", metavar='Weights File', type=str, nargs="
                     dest='weights_file', help='Weights File Name')
 parser.add_argument("-n", "--name", metavar='Simulator Name', type=str, nargs="?",
                     dest='name', help='Name of the simulator run', default="default")
+parser.add_argument("-s", "--step", metavar='Step', type=int, nargs="?",
+                    dest='step', help='Step Number of the Training', default="default")
 args = parser.parse_args()
 
 
@@ -38,15 +44,21 @@ class Client():
         # Iterate through all batches
         for batch in self.datagen:
             self.train_step(batch)
-        print("Client {} results: Loss - {}, Acc - {}"
+        print("Client {} results: Loss - {:.5f}, Acc - {:.3f}%"
               .format(self.id, self.loss_metrics.result(), self.acc_metrics.result() * 100))
+        sys.stdout.flush()
+        self.save_gradients()
+        sys.stdout.write(json.dumps({
+            "id": self.id
+        }))
+        sys.exit(0)
 
     def train_step(self, batch):
         # Calculate outcome for one batch
         with tf.GradientTape() as tape:
             predictions = self.model(batch["x"], training=True)
             loss = self.loss(batch["y"], predictions)
-            grads = tape.gradient(loss, self.model.trainable_variables)
+        grads = tape.gradient(loss, self.model.trainable_variables)
 
         # Accumulate gradients
         self.accumulate_gradients(grads)
@@ -61,6 +73,13 @@ class Client():
             self.acc_gradient = gradient
         else:
             self.acc_gradient = [tf.add(old_grad, new_grad) for old_grad, new_grad in zip(self.acc_gradient, gradient)]
+
+    def save_gradients(self):
+        # gradient_path = os.path.join("temp", args.name, "gradient_step_{}_client_{}.h5".format(args.step, self.id))
+        gradient_path = os.path.join("temp", args.name, "gradient_client_{}.h5".format(self.id))
+        gradient_np = [value.numpy() for value in self.acc_gradient]
+        with open(gradient_path, "wb") as gradient_file:
+            pickle.dump(gradient_np, gradient_file)
 
 
 Client().iterate()

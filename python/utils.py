@@ -5,10 +5,10 @@ import numpy as np
 from collections import OrderedDict
 from random import sample, choice
 import tensorflow as tf
+import json
+
 
 # Loads h5 data
-
-
 def load_h5(file_path):
     with open(file_path, "rb") as data_file:
         X, Y = pickle.load(data_file)
@@ -25,15 +25,23 @@ def load_labels(file_path):
 
 # Load dataset
 def load_dataset(directory: str, client_id: int):
-    data_file_path = os.path.join("temp", directory, "client_" + str(client_id) + "_data.h5")
+    data_file_path = os.path.join("temp", directory, "data_client_{}.h5".format(client_id))
     with open(data_file_path, "rb") as dataset_file:
         dataset = pickle.load(dataset_file)
     return (tf.data.Dataset
             .from_tensor_slices((dataset["x"], dataset["y"]))
             .repeat(dataset["epochs"])
             .map(lambda x, y: OrderedDict([("x", x), ("y", y)]))
-            .shuffle(len(dataset["y"]))
+            .shuffle(len(dataset["y"]) + 1)
             .batch(dataset["batch_size"]))
+
+
+# Load test dataset
+def load_test_dataset(file_path: str):
+    testX, testY = load_h5(file_path)
+    return (tf.data.Dataset
+            .from_tensor_slices((testX, testY))
+            .map(lambda x, y: OrderedDict([("x", x), ("y", y)]))).batch(64)
 
 
 # Load dummy
@@ -43,7 +51,21 @@ def load_dummy(directory: str):
         dummy_data = pickle.load(dummy_file)
     return tf.convert_to_tensor(dummy_data)
 
-# Separate data by class
+
+# Load Client Gradient
+def load_gradient(directory: str, step: int, client_id: int):
+    # gradient_path = os.path.join("temp", directory, "gradient_step_{}_client_{}.h5".format(step, client_id))
+    gradient_path = os.path.join("temp", directory, "gradient_client_{}.h5".format(client_id))
+    with open(gradient_path, "rb") as gradient_file:
+        gradient = pickle.load(gradient_file)
+    return gradient
+
+
+# Load Client Gradients
+def load_gradients(directory: str, step: int, client_ids: int):
+    gradients = [load_gradient(directory, step, client_id) for client_id in client_ids]
+    average_gradient = np.sum(gradients, axis=0) / len(client_ids)
+    return average_gradient
 
 
 # Separate training data by class
@@ -117,7 +139,7 @@ def generate_client_dataset_files(
         client_data["x"] = np.asarray(client_data["x"])
         client_data["y"] = np.asarray(client_data["y"])
         data_folder_path = os.path.join("temp", directory)
-        data_file_path = os.path.join("temp", directory, "client_" + str(client_id) + "_data.h5")
+        data_file_path = os.path.join("temp", directory, "data_client_{}.h5".format(client_id))
         os.makedirs(data_folder_path, exist_ok=True)
         with open(data_file_path, "wb") as file:
             pickle.dump(client_data, file)

@@ -8,9 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const bb = require("bluebird");
 const child_process_1 = require("child_process");
 const inquirer = require("inquirer");
 const shelljs = require("shelljs");
+const asyncShell_1 = require("./asyncShell");
 class Simulator {
     constructor() {
         this.setup = () => __awaiter(this, void 0, void 0, function* () {
@@ -27,25 +29,25 @@ class Simulator {
                     type: 'input',
                     name: 'localBatchSize',
                     message: 'What is the local batch size?',
-                    default: 32,
+                    default: 64,
                 },
                 {
                     type: 'input',
                     name: 'localEpochs',
                     message: 'What is the local epochs?',
-                    default: 1,
+                    default: 2,
                 },
                 {
                     type: 'input',
                     name: 'clientsPerRound',
                     message: 'How many clients per round?',
-                    default: 1,
+                    default: 10,
                 },
                 {
                     type: 'input',
                     name: 'clientCount',
                     message: 'How many clients in total?',
-                    default: 10,
+                    default: 300,
                 },
                 {
                     type: 'input',
@@ -61,7 +63,11 @@ class Simulator {
             this.clientCount = clientCount;
             this.iterations = iterations;
             // Run Setup Script
-            yield shelljs.exec(`python python/setup.py -n ${this.name} -b ${this.localBatchSize} -e ${this.localEpochs} -t ${this.clientCount}`);
+            const { stderr, stdout, code } = shelljs.exec(`python python/setup.py -n ${this.name} -b ${this.localBatchSize} -e ${this.localEpochs} -t ${this.clientCount}`);
+            if (code !== 0) {
+                console.error('[Simulator] Setup failed');
+                process.exit(1);
+            }
             console.log('[Simulator] Finished setting up');
             this.serverProcess = child_process_1.spawn('python', [
                 'python/server.py',
@@ -86,11 +92,30 @@ class Simulator {
             const message = JSON.parse(data.toString());
             switch (message.type) {
                 case 'train':
-                    const { stdout, stderr } = shelljs.exec(`python python/client.py -n ${this.name} -w ${message.weights_file_path} -i ${message.clients[0]}`, {
-                        async: false,
-                        silent: false,
+                    bb.map(message.clients, clientId => {
+                        return asyncShell_1.execAsync(`python python/client.py -n ${this.name} -w ${message.weights_file_path} -i ${clientId} -s ${message.step}`, {
+                            async: true,
+                            silent: true,
+                        });
+                    }, {
+                        concurrency: 1,
+                    }).then(results => {
+                        // Filter Results
+                        try {
+                            const successfulClients = results
+                                .filter(value => value.code === 0)
+                                .map(value => JSON.parse(value.stdout.split('\n').slice(-1)[0]).id);
+                            // console.log(
+                            //   `Clients ${successfulClients} (${successfulClients.length} / ${
+                            //     message.clients.length
+                            //   }) Trained `
+                            // );
+                            this.sendWeights(successfulClients);
+                        }
+                        catch (e) {
+                            console.log(results);
+                        }
                     });
-                    console.log('Client Trained');
                     break;
                 case 'update':
                     console.log(`[Simulator] Step ${message.step}: ${JSON.stringify(message.message, null, 4)}`);
@@ -105,6 +130,9 @@ class Simulator {
     startServer() {
         this.serverProcess.stdin.write('start\n');
         console.log('[Simulator] Server started');
+    }
+    sendWeights(ids) {
+        this.serverProcess.stdin.write(JSON.stringify({ ids }) + '\n');
     }
 }
 new Simulator().setup();

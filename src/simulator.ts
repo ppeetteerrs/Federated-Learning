@@ -1,8 +1,10 @@
+import * as bb from 'bluebird';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import * as inquirer from 'inquirer';
 import { join } from 'path';
 import { stringify } from 'querystring';
 import * as shelljs from 'shelljs';
+import { execAsync } from './asyncShell';
 
 interface MessageFormat {
   type: 'train' | 'log' | 'update';
@@ -43,25 +45,25 @@ class Simulator {
         type: 'input',
         name: 'localBatchSize',
         message: 'What is the local batch size?',
-        default: 32,
+        default: 64,
       },
       {
         type: 'input',
         name: 'localEpochs',
         message: 'What is the local epochs?',
-        default: 1,
+        default: 2,
       },
       {
         type: 'input',
         name: 'clientsPerRound',
         message: 'How many clients per round?',
-        default: 1,
+        default: 10,
       },
       {
         type: 'input',
         name: 'clientCount',
         message: 'How many clients in total?',
-        default: 10,
+        default: 300,
       },
       {
         type: 'input',
@@ -114,25 +116,49 @@ class Simulator {
     console.log('[Simulator] Server started');
   }
 
+  private sendWeights(ids: number[]) {
+    this.serverProcess.stdin.write(JSON.stringify({ ids }) + '\n');
+  }
+
   private handleServerMessage = (data: Buffer) => {
     const message: MessageFormat = JSON.parse(data.toString());
 
     switch (message.type) {
       case 'train':
-        Promise.all<{ stdout: string; stderr: string; code: number }>(
-          message.clients.map(clientId => {
-            return shelljs.exec(
+        bb.map<number, { stdout: string; stderr: string; code: number }>(
+          message.clients,
+          clientId => {
+            return execAsync(
               `python python/client.py -n ${this.name} -w ${
                 message.weights_file_path
-              } -i ${clientId}`,
+              } -i ${clientId} -s ${message.step}`,
               {
                 async: true,
-                silent: false,
+                silent: true,
               }
             );
-          })
-        );
-        console.log('Client Trained');
+          },
+          {
+            concurrency: 1,
+          }
+        ).then(results => {
+          // Filter Results
+          try {
+            const successfulClients: number[] = results
+              .filter(value => value.code === 0)
+              .map(
+                value => JSON.parse(value.stdout.split('\n').slice(-1)[0]).id
+              );
+            // console.log(
+            //   `Clients ${successfulClients} (${successfulClients.length} / ${
+            //     message.clients.length
+            //   }) Trained `
+            // );
+            this.sendWeights(successfulClients);
+          } catch (e) {
+            console.log(results);
+          }
+        });
         break;
       case 'update':
         console.log(

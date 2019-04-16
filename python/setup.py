@@ -13,16 +13,16 @@ parser.add_argument("-t", "--total", metavar='Number of Clients', type=int, narg
                     dest='total', help='Number of Clients')
 args = parser.parse_args()
 
-rawX, rawY = load_h5("cifar/train_data.h5")
+trainX, trainY = load_h5("cifar/train_data.h5")
 labels = load_labels("cifar/labels.h5")
-separated_data = separate_data_by_class(rawX, rawY, labels)
+separated_data = separate_data_by_class(trainX, trainY, labels)
 datasets = generate_client_dataset_files(dataset=separated_data,
                                          directory=args.name,
                                          epochs=args.epochs,
                                          batch_size=args.batch_size,
                                          n_clients=args.total,
-                                         n_samples_min=100,
-                                         n_samples_max=500,
-                                         n_classes_min=1,
-                                         n_classes_max=4,
-                                         no_repeat=True)
+                                         n_samples_min=200,
+                                         n_samples_max=1000,
+                                         n_classes_min=3,
+                                         n_classes_max=10,
+                                         no_repeat=False)
