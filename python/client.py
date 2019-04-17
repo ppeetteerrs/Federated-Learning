@@ -8,8 +8,8 @@ parser.add_argument("-n", "--name", metavar='Simulator Name', type=str, nargs="?
                     dest='name', help='Name of the simulator run', default="default")
 parser.add_argument("-s", "--step", metavar='Step', type=int, nargs="?",
                     dest='step', help='Step Number of the Training', default="default")
-parser.add_argument("-g", "--gpu", metavar='GPU ID', type=int, nargs="?",
-                    dest='gpu_id', help='GPU ID', default=0)
+parser.add_argument("-g", "--gpu", metavar='GPU ID', type=str, nargs="?",
+                    dest='gpu_id', help='GPU ID', default="0")
 args = parser.parse_args()
 
 import os

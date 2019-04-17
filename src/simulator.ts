@@ -22,7 +22,7 @@ class Simulator {
   public clientCount: number = 500;
   public iterations: number = 20000;
   public concurrency: number = 3;
-  public gpuID: number = 0;
+  public gpuID: number = 1;
   public serverProcess: ChildProcessWithoutNullStreams;
 
   public setup = async (): Promise<Simulator> => {
@@ -84,7 +84,7 @@ class Simulator {
     const { stderr, stdout, code } = shelljs.exec(
       `python python/setup.py -n ${this.name} -b ${this.localBatchSize} -e ${
       this.localEpochs
-      } -t ${this.clientCount}`
+      } -t ${this.clientCount} -g ${this.gpuID}`
     );
     if (code !== 0) {
       console.error('[Simulator] Setup failed');
