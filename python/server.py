@@ -34,6 +34,8 @@ class Server():
         log_dir = "logs/{}".format(args.name)
         self.summary_writer = tf.summary.create_file_writer(logdir=log_dir)
         self.summary_writer.set_as_default()
+        weights_dir_path = os.path.join("temp", args.name)
+        os.makedirs(weights_dir_path, exist_ok=True)
 
         # Generate the Keras Model
         dummy_data = load_dummy(args.datasetname)
@@ -49,7 +51,6 @@ class Server():
     def iterate(self, iteration: int):
         weights_file_path = os.path.join("temp", args.name, "weights_server.h5")
         # Output weights
-        os.makedirs(weights_file_path, exist_ok=True)
         self.model.save_weights(weights_file_path)
 
         # Choose clients
