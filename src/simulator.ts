@@ -149,7 +149,7 @@ class Simulator {
                 "-d", this.options.dataset].join(" "),
               {
                 async: true,
-                silent: true,
+                silent: false,
               }
             );
           },
