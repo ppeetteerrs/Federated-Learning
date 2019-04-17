@@ -8,6 +8,8 @@ import json
 import tensorflow as tf
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+tf.config.gpu.set_per_process_memory_fraction(0.4)
 parser = argparse.ArgumentParser(description="Parse Server Arguments")
 parser.add_argument("-c", "--clients", metavar='Clients Per Iteration', type=int, nargs="?",
                     dest='clients', help='Clients Per Iteration', default=1)
@@ -22,7 +24,7 @@ parser.add_argument("-g", "--gpu", metavar='GPU ID', type=int, nargs="?",
 args = parser.parse_args()
 
 with tf.device('/device:GPU:{}'.format(args.gpu_id)):
-    tf.config.gpu.set_per_process_memory_fraction(0.4)
+
     class Server():
         def __init__(self):
             self.optimizer = tf.keras.optimizers.Adam()
@@ -111,7 +113,5 @@ with tf.device('/device:GPU:{}'.format(args.gpu_id)):
             for i in range(1, self.total_iterations+1):
                 self.iterate(i)
                 self.current_iteration += 1
-
-
 
     Server().listen()
