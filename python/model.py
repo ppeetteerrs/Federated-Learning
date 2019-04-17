@@ -4,32 +4,32 @@ from tensorflow.python.keras import layers, Model, regularizers
 class KerasModel(Model):
     def __init__(self):
         super(KerasModel, self).__init__()
-        weight_decay = 1e-4;
+        weight_decay = 1e-4
         self.conv1 = layers.Conv2D(32, (3, 3), padding='same', input_shape=(32, 32, 3),
                                    kernel_regularizer=regularizers.l2(weight_decay))
         self.elu1 = layers.ELU()
-        self.bn1 = layers.BatchNormalizationV2()
+        self.bn1 = layers.BatchNormalization()
         self.conv2 = layers.Conv2D(32, (3, 3), kernel_regularizer=regularizers.l2(weight_decay))
         self.elu2 = layers.ELU()
-        self.bn2 = layers.BatchNormalizationV2()
+        self.bn2 = layers.BatchNormalization()
         self.pool1 = layers.MaxPool2D(pool_size=(2, 2))
         self.dropout1 = layers.Dropout(rate=0.2)
 
         self.conv3 = layers.Conv2D(64, (3, 3), padding='same', kernel_regularizer=regularizers.l2(weight_decay))
         self.elu3 = layers.ELU()
-        self.bn3 = layers.BatchNormalizationV2()
+        self.bn3 = layers.BatchNormalization()
         self.conv4 = layers.Conv2D(64, (3, 3), kernel_regularizer=regularizers.l2(weight_decay))
         self.elu4 = layers.ELU()
-        self.bn4 = layers.BatchNormalizationV2()
+        self.bn4 = layers.BatchNormalization()
         self.pool2 = layers.MaxPool2D(pool_size=(2, 2))
         self.dropout2 = layers.Dropout(rate=0.3)
 
         self.conv5 = layers.Conv2D(128, (3, 3), padding='same', kernel_regularizer=regularizers.l2(weight_decay))
         self.elu5 = layers.ELU()
-        self.bn5 = layers.BatchNormalizationV2()
+        self.bn5 = layers.BatchNormalization()
         self.conv6 = layers.Conv2D(128, (3, 3), kernel_regularizer=regularizers.l2(weight_decay))
         self.elu6 = layers.ELU()
-        self.bn6 = layers.BatchNormalizationV2()
+        self.bn6 = layers.BatchNormalization()
         self.pool3 = layers.MaxPool2D(pool_size=(2, 2))
         self.dropout3 = layers.Dropout(rate=0.4)
 

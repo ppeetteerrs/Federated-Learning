@@ -1,4 +1,4 @@
-const dataset = "1000-clients-1-class-no-repeat";
+const dataset = "1000-clients-1-class-repeat";
 
 module.exports = {
     apps : [{
