@@ -1,13 +1,4 @@
-from random import sample
 import argparse
-import os
-import sys
-import json
-import tensorflow as tf
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-tf.config.gpu.set_per_process_memory_fraction(0.4)
 parser = argparse.ArgumentParser(description="Parse Server Arguments")
 parser.add_argument("-c", "--clients", metavar='Clients Per Iteration', type=int, nargs="?",
                     dest='clients', help='Clients Per Iteration', default=1)
@@ -21,7 +12,18 @@ parser.add_argument("-g", "--gpu", metavar='GPU ID', type=int, nargs="?",
                     dest='gpu_id', help='GPU ID', default=0)
 args = parser.parse_args()
 
-with tf.device('/device:GPU:{}'.format(args.gpu_id)):
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_GPU_ID'] = args.gpu_id
+
+from random import sample
+import sys
+import json
+import tensorflow as tf
+
+tf.config.gpu.set_per_process_memory_fraction(0.4)
+
+with tf.device('/device:GPU:{}'.format(os.environ['TF_GPU_ID'])):
 
     from model import KerasModel
     from utils import load_dummy, load_gradients, load_test_dataset
