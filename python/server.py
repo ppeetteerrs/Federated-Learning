@@ -8,7 +8,6 @@ import json
 import tensorflow as tf
 
 tf.config.gpu.set_per_process_memory_fraction(0.4)
-tf.config.gpu.set_per_process_memory_growth(True)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 parser = argparse.ArgumentParser(description="Parse Server Arguments")
 parser.add_argument("-c", "--clients", metavar='Clients Per Iteration', type=int, nargs="?",

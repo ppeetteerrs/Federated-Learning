@@ -15,73 +15,74 @@ interface MessageFormat {
 }
 
 class Simulator {
-  public name: string;
-  public localBatchSize: number;
-  public localEpochs: number;
-  public clientsPerRound: number;
-  public clientCount: number;
-  public iterations: number;
+  public name: string = "test";
+  public localBatchSize: number = 64;
+  public localEpochs: number = 1;
+  public clientsPerRound: number = 15;
+  public clientCount: number = 500;
+  public iterations: number = 20000;
+  public concurrency: number = 15;
   public serverProcess: ChildProcessWithoutNullStreams;
 
   public setup = async (): Promise<Simulator> => {
     // Sanity Checks
 
     // Prompt for Settings
-    const {
-      name,
-      localBatchSize,
-      localEpochs,
-      clientsPerRound,
-      clientCount,
-      iterations,
-    } = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'name',
-        message: 'What is the name of this simulation?',
-        default: 'default',
-      },
-      {
-        type: 'input',
-        name: 'localBatchSize',
-        message: 'What is the local batch size?',
-        default: 64,
-      },
-      {
-        type: 'input',
-        name: 'localEpochs',
-        message: 'What is the local epochs?',
-        default: 2,
-      },
-      {
-        type: 'input',
-        name: 'clientsPerRound',
-        message: 'How many clients per round?',
-        default: 10,
-      },
-      {
-        type: 'input',
-        name: 'clientCount',
-        message: 'How many clients in total?',
-        default: 300,
-      },
-      {
-        type: 'input',
-        name: 'iterations',
-        message: 'How many iterations in total?',
-        default: 10000,
-      },
-    ]);
-    this.name = name;
-    this.localBatchSize = localBatchSize;
-    this.localEpochs = localEpochs;
-    this.clientsPerRound = clientsPerRound;
-    this.clientCount = clientCount;
-    this.iterations = iterations;
+    // const {
+    //   name,
+    //   localBatchSize,
+    //   localEpochs,
+    //   clientsPerRound,
+    //   clientCount,
+    //   iterations,
+    // } = await inquirer.prompt([
+    //   {
+    //     type: 'input',
+    //     name: 'name',
+    //     message: 'What is the name of this simulation?',
+    //     default: 'default',
+    //   },
+    //   {
+    //     type: 'input',
+    //     name: 'localBatchSize',
+    //     message: 'What is the local batch size?',
+    //     default: 64,
+    //   },
+    //   {
+    //     type: 'input',
+    //     name: 'localEpochs',
+    //     message: 'What is the local epochs?',
+    //     default: 2,
+    //   },
+    //   {
+    //     type: 'input',
+    //     name: 'clientsPerRound',
+    //     message: 'How many clients per round?',
+    //     default: 10,
+    //   },
+    //   {
+    //     type: 'input',
+    //     name: 'clientCount',
+    //     message: 'How many clients in total?',
+    //     default: 300,
+    //   },
+    //   {
+    //     type: 'input',
+    //     name: 'iterations',
+    //     message: 'How many iterations in total?',
+    //     default: 10000,
+    //   },
+    // ]);
+    // this.name = name;
+    // this.localBatchSize = localBatchSize;
+    // this.localEpochs = localEpochs;
+    // this.clientsPerRound = clientsPerRound;
+    // this.clientCount = clientCount;
+    // this.iterations = iterations;
     // Run Setup Script
     const { stderr, stdout, code } = shelljs.exec(
       `python python/setup.py -n ${this.name} -b ${this.localBatchSize} -e ${
-        this.localEpochs
+      this.localEpochs
       } -t ${this.clientCount}`
     );
     if (code !== 0) {
@@ -130,7 +131,7 @@ class Simulator {
           clientId => {
             return execAsync(
               `python python/client.py -n ${this.name} -w ${
-                message.weights_file_path
+              message.weights_file_path
               } -i ${clientId} -s ${message.step}`,
               {
                 async: true,
@@ -139,7 +140,7 @@ class Simulator {
             );
           },
           {
-            concurrency: 1,
+            concurrency: this.concurrency,
           }
         ).then(results => {
           // Filter Results

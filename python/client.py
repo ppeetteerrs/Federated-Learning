@@ -7,8 +7,7 @@ import pickle
 import json
 import tensorflow as tf
 import sys
-tf.config.gpu.set_per_process_memory_fraction(0.4)
-tf.config.gpu.set_per_process_memory_growth(True)
+tf.config.gpu.set_per_process_memory_fraction(0.2)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 parser = argparse.ArgumentParser(description="Parse Client Arguments")
