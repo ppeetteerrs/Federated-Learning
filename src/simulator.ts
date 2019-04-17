@@ -22,6 +22,7 @@ class Simulator {
   public clientCount: number = 500;
   public iterations: number = 20000;
   public concurrency: number = 15;
+  public gpuID: number = 0;
   public serverProcess: ChildProcessWithoutNullStreams;
 
   public setup = async (): Promise<Simulator> => {
@@ -101,6 +102,8 @@ class Simulator {
       this.iterations.toString(),
       '-n',
       this.name,
+      '-g',
+      this.gpuID.toString()
     ]);
     this.serverProcess.stderr.pipe(process.stderr);
     this.serverProcess.stdout.on('data', this.handleServerMessage);
@@ -132,7 +135,7 @@ class Simulator {
             return execAsync(
               `python python/client.py -n ${this.name} -w ${
               message.weights_file_path
-              } -i ${clientId} -s ${message.step}`,
+              } -i ${clientId} -s ${message.step} -g ${this.gpuID}`,
               {
                 async: true,
                 silent: true,
