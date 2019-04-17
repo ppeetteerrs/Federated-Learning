@@ -58,11 +58,6 @@ class Server():
 
         # Inform simulator to train clients
         message = {
-            "type": "log",
-            "message": weights_file_path
-        }
-        print(json.dumps(message), flush=True)
-        message = {
             "type": "train",
             "clients": chosen_clients,
             "weights_file_path": weights_file_path,

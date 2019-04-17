@@ -149,7 +149,7 @@ class Simulator {
                 "-d", this.options.dataset,
                 "-b", this.options.batchSize.toString(),
                 "-e", this.options.epochs.toString()
-              ].join(),
+              ].join(" "),
               {
                 async: true,
                 silent: false,
