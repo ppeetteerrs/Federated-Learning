@@ -27,7 +27,6 @@ parser.add_argument("-b", "--batch", metavar='Batch Size', type=int, nargs="?",
 parser.add_argument("-e", "--epochs", metavar='Epochs', type=int, nargs="?",
                     dest='epochs', help='Epochs', default=1)
 args = parser.parse_args()
-print(args.gpu_fraction)
 tf.config.gpu.set_per_process_memory_fraction(args.gpu_fraction)
 
 
