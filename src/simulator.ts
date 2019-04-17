@@ -81,6 +81,10 @@ class Simulator {
     // this.clientCount = clientCount;
     // this.iterations = iterations;
     // Run Setup Script
+
+    shelljs.env.TF_CPP_MIN_LOG_LEVEL = "3";
+    shelljs.env.CUDA_VISIBLE_DEVICES = this.gpuID.toString();
+
     const { stderr, stdout, code } = shelljs.exec(
       `python python/setup.py -n ${this.name} -b ${this.localBatchSize} -e ${
       this.localEpochs
