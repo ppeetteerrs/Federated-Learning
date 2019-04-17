@@ -146,7 +146,10 @@ class Simulator {
                 "-i", clientId,
                 "-s", message.step,
                 "-f", this.options.clientGPUFraction.toFixed(10),
-                "-d", this.options.dataset].join(" "),
+                "-d", this.options.dataset,
+                "-b", this.options.batchSize.toString(),
+                "-e", this.options.epochs.toString()
+              ].join(),
               {
                 async: true,
                 silent: false,

@@ -22,6 +22,10 @@ parser.add_argument("-f", "--fraction", metavar='GPU Fraction', type=float, narg
                     dest='gpu_fraction', help='GPU Fraction', default=0.15)
 parser.add_argument("-d", "--datasetname", metavar='Dataset Name', type=str, nargs="?",
                     dest='datasetname', help='Name of the dataset', default="default")
+parser.add_argument("-b", "--batch", metavar='Batch Size', type=int, nargs="?",
+                    dest='batch', help='Batch Size', default=64)
+parser.add_argument("-e", "--epochs", metavar='Epochs', type=int, nargs="?",
+                    dest='epochs', help='Epochs', default=1)
 args = parser.parse_args()
 print(args.gpu_fraction)
 tf.config.gpu.set_per_process_memory_fraction(args.gpu_fraction)
@@ -40,7 +44,8 @@ class Client():
         self.model = KerasModel()
         self.model(dummy_data)
         self.model.load_weights(args.weights_file)
-        self.dataset = load_dataset(args.datasetname, self.id)
+        self.dataset = load_dataset(directory=args.datasetname, client_id=self.id,
+                                    batch_size=args.batch, epochs=args.epochs)
         self.datagen = iter(self.dataset)
         self.acc_gradient = None
 
