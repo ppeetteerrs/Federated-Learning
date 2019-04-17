@@ -8,7 +8,7 @@ from model import KerasModel
 from utils import load_dataset, load_dummy
 import os
 
-tf.config.gpu.set_per_process_memory_fraction(0.2)
+tf.config.gpu.set_per_process_memory_fraction(0.15)
 
 parser = argparse.ArgumentParser(description="Parse Client Arguments")
 parser.add_argument("-i", "--id", metavar='Client ID', type=int, nargs="?",

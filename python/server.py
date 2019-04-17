@@ -7,7 +7,7 @@ from model import KerasModel
 from utils import load_dummy, load_gradients, load_test_dataset
 import os
 
-tf.config.gpu.set_per_process_memory_fraction(0.4)
+tf.config.gpu.set_per_process_memory_fraction(0.2)
 parser = argparse.ArgumentParser(description="Parse Server Arguments")
 parser.add_argument("-c", "--clients", metavar='Clients Per Iteration', type=int, nargs="?",
                     dest='clients', help='Clients Per Iteration', default=1)

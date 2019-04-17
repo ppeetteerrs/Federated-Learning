@@ -16,13 +16,13 @@ interface MessageFormat {
 
 class Simulator {
   public name: string = "test";
+  public gpuID: number = 0;
   public localBatchSize: number = 64;
   public localEpochs: number = 1;
   public clientsPerRound: number = 15;
   public clientCount: number = 500;
-  public iterations: number = 20000;
+  public iterations: number = 2000;
   public concurrency: number = 3;
-  public gpuID: number = 1;
   public serverProcess: ChildProcessWithoutNullStreams;
 
   public setup = async (): Promise<Simulator> => {
