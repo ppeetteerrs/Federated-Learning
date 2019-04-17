@@ -8,12 +8,7 @@ import tensorflow as tf
 import json
 
 
-#
-
-
-s h5 data
-
-
+# Loads h5 data
 def load_h5(file_path):
     with open(file_path, "rb") as data_file:
         X, Y = pickle.load(data_file)
