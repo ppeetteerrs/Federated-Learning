@@ -1,5 +1,3 @@
-from model import KerasModel
-from utils import load_dataset, load_dummy
 from random import sample
 import argparse
 import os
@@ -25,6 +23,9 @@ parser.add_argument("-g", "--gpu", metavar='GPU ID', type=int, nargs="?",
 args = parser.parse_args()
 
 with tf.device('/device:GPU:{}'.format(args.gpu_id)):
+    from model import KerasModel
+    from utils import load_dataset, load_dummy
+
     class Client():
         def __init__(self):
             self.id = args.id

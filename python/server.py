@@ -1,5 +1,3 @@
-from model import KerasModel
-from utils import load_dummy, load_gradients, load_test_dataset
 from random import sample
 import argparse
 import os
@@ -24,6 +22,9 @@ parser.add_argument("-g", "--gpu", metavar='GPU ID', type=int, nargs="?",
 args = parser.parse_args()
 
 with tf.device('/device:GPU:{}'.format(args.gpu_id)):
+
+    from model import KerasModel
+    from utils import load_dummy, load_gradients, load_test_dataset
 
     class Server():
         def __init__(self):

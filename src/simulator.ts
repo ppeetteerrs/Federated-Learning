@@ -21,7 +21,7 @@ class Simulator {
   public clientsPerRound: number = 15;
   public clientCount: number = 500;
   public iterations: number = 20000;
-  public concurrency: number = 15;
+  public concurrency: number = 3;
   public gpuID: number = 0;
   public serverProcess: ChildProcessWithoutNullStreams;
 
