@@ -5,6 +5,7 @@ import json
 import tensorflow as tf
 from model import KerasModel
 from utils import load_dummy, load_gradients, load_test_dataset
+import os
 
 tf.config.gpu.set_per_process_memory_fraction(0.4)
 parser = argparse.ArgumentParser(description="Parse Server Arguments")

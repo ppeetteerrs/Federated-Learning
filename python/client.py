@@ -6,6 +6,7 @@ import tensorflow as tf
 import sys
 from model import KerasModel
 from utils import load_dataset, load_dummy
+import os
 
 tf.config.gpu.set_per_process_memory_fraction(0.2)
 
