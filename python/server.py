@@ -21,6 +21,11 @@ parser.add_argument("-d", "--datasetname", metavar='Dataset Name', type=str, nar
 parser.add_argument("-f", "--fraction", metavar='GPU Fraction', type=float, nargs="?",
                     dest='gpu_fraction', help='GPU Fraction', default=0.15)
 args = parser.parse_args()
+message = {
+    "type": "log",
+    "message": str(args.gpu_fraction) + str(type(args.gpu_fraction))
+}
+print(json.dumps(message), flush=True)
 
 tf.config.gpu.set_per_process_memory_fraction(args.gpu_fraction)
 
