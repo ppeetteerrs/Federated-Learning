@@ -19,7 +19,7 @@ parser.add_argument("-n", "--name", metavar='Simulator Name', type=str, nargs="?
 parser.add_argument("-s", "--step", metavar='Step', type=int, nargs="?",
                     dest='step', help='Step Number of the Training', default="default")
 parser.add_argument("-f", "--fraction", metavar='GPU Fraction', type=float, nargs="?",
-                    dest='gpu_fraction', help='GPU Fraction', default=0.2)
+                    dest='gpu_fraction', help='GPU Fraction', default=0.15)
 parser.add_argument("-d", "--datasetname", metavar='Dataset Name', type=str, nargs="?",
                     dest='datasetname', help='Name of the dataset', default="default")
 args = parser.parse_args()

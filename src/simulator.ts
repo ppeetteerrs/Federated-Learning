@@ -145,7 +145,7 @@ class Simulator {
                 "-w", message.weights_file_path,
                 "-i", clientId,
                 "-s", message.step,
-                "-f", this.options.serverGPUFraction.toFixed(10),
+                "-f", this.options.clientGPUFraction.toFixed(10),
                 "-d", this.options.dataset].join(" "),
               {
                 async: true,
