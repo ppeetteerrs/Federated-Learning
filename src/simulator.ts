@@ -152,7 +152,7 @@ class Simulator {
               ].join(" "),
               {
                 async: true,
-                silent: false,
+                silent: true,
               }
             );
           },
