@@ -8,7 +8,12 @@ import tensorflow as tf
 import json
 
 
-# Loads h5 data
+#
+
+
+s h5 data
+
+
 def load_h5(file_path):
     with open(file_path, "rb") as data_file:
         X, Y = pickle.load(data_file)
@@ -27,7 +32,7 @@ def load_labels(file_path):
 
 
 def load_dataset(directory: str, client_id: int, batch_size: int, epochs: int):
-    data_file_path = os.path.join("temp", directory, "data_client_{}.h5".format(client_id))
+    data_file_path = os.path.join("datasets", directory, "data_client_{}.h5".format(client_id))
     with open(data_file_path, "rb") as dataset_file:
         dataset = pickle.load(dataset_file)
     return (tf.data.Dataset
