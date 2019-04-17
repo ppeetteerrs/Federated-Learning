@@ -49,6 +49,7 @@ class Server():
     def iterate(self, iteration: int):
         weights_file_path = os.path.join("temp", args.name, "weights_server.h5")
         # Output weights
+        os.makedirs(weights_file_path, exist_ok=True)
         self.model.save_weights(weights_file_path)
 
         # Choose clients
