@@ -9,6 +9,7 @@
         "interface-name": false,
         "object-literal-sort-keys": false,
         "no-var-requires": false,
-        "trailing-comma": true
+        "trailing-comma": true,
+        "quotemark": true
     }
 }

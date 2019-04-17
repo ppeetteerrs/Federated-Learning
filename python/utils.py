@@ -26,16 +26,16 @@ def load_labels(file_path):
 # Load dataset
 
 
-def load_dataset(directory: str, client_id: int):
+def load_dataset(directory: str, client_id: int, batch_size: int, epochs: int):
     data_file_path = os.path.join("temp", directory, "data_client_{}.h5".format(client_id))
     with open(data_file_path, "rb") as dataset_file:
         dataset = pickle.load(dataset_file)
     return (tf.data.Dataset
             .from_tensor_slices((dataset["x"], dataset["y"]))
-            .repeat(dataset["epochs"])
+            .repeat(epochs)
             .map(lambda x, y: OrderedDict([("x", x), ("y", y)]))
             .shuffle(len(dataset["y"]) + 1)
-            .batch(dataset["batch_size"]))
+            .batch(batch_size))
 
 # Load test dataset
 
@@ -50,7 +50,7 @@ def load_test_dataset(file_path: str):
 
 
 def load_dummy(directory: str):
-    dummy_file_path = os.path.join("temp", directory, "dummy_data.h5")
+    dummy_file_path = os.path.join("datasets", directory, "dummy_data.h5")
     with open(dummy_file_path, "rb") as dummy_file:
         dummy_data = pickle.load(dummy_file)
     return tf.convert_to_tensor(dummy_data)
@@ -97,8 +97,6 @@ def separate_data_by_class(X: [], Y: [], labels: [] = None):
 def generate_client_dataset_files(
     dataset: {},
     directory: str,
-    epochs: int,
-    batch_size: int,
     n_clients: int = 1,
     n_samples_min: int = 100,
     n_samples_max: int = None,
@@ -119,8 +117,6 @@ def generate_client_dataset_files(
         client_data = {
             "x": [],
             "y": [],
-            "epochs": epochs,
-            "batch_size": batch_size,
             "n_samples": n_samples
         }
         chosen_classes = sample(classes, n_classes)
@@ -146,13 +142,13 @@ def generate_client_dataset_files(
                     del data["y"][j]
         client_data["x"] = np.asarray(client_data["x"])
         client_data["y"] = np.asarray(client_data["y"])
-        data_folder_path = os.path.join("temp", directory)
-        data_file_path = os.path.join("temp", directory, "data_client_{}.h5".format(client_id))
+        data_folder_path = os.path.join("datasets", directory)
+        data_file_path = os.path.join("datasets", directory, "data_client_{}.h5".format(client_id))
         os.makedirs(data_folder_path, exist_ok=True)
         with open(data_file_path, "wb") as file:
             pickle.dump(client_data, file)
         if client_id == 0:
-            dummy_file_path = os.path.join("temp", directory, "dummy_data.h5")
+            dummy_file_path = os.path.join("datasets", directory, "dummy_data.h5")
             with open(dummy_file_path, "wb") as file:
                 pickle.dump(client_data["x"], file)
     for i in range(n_clients):

@@ -7,7 +7,6 @@ from model import KerasModel
 from utils import load_dummy, load_gradients, load_test_dataset
 import os
 
-tf.config.gpu.set_per_process_memory_fraction(0.2)
 parser = argparse.ArgumentParser(description="Parse Server Arguments")
 parser.add_argument("-c", "--clients", metavar='Clients Per Iteration', type=int, nargs="?",
                     dest='clients', help='Clients Per Iteration', default=1)
@@ -17,9 +16,13 @@ parser.add_argument("-i", "--iterations", metavar='Iterations', type=int, nargs=
                     dest='iterations', help='Iterations', default=10000)
 parser.add_argument("-n", "--name", metavar='Simulator Name', type=str, nargs="?",
                     dest='name', help='Name of the simulator run', default="default")
-parser.add_argument("-g", "--gpu", metavar='GPU ID', type=str, nargs="?",
-                    dest='gpu_id', help='GPU ID', default="0")
+parser.add_argument("-d", "--datasetname", metavar='Dataset Name', type=str, nargs="?",
+                    dest='datasetname', help='Name of the dataset', default="default")
+parser.add_argument("-f", "--fraction", metavar='GPU Fraction', type=float, nargs="?",
+                    dest='gpu_fraction', help='GPU Fraction', default=0.15)
 args = parser.parse_args()
+
+tf.config.gpu.set_per_process_memory_fraction(args.gpu_fraction)
 
 
 class Server():
@@ -28,9 +31,12 @@ class Server():
         self.loss = tf.keras.losses.SparseCategoricalCrossentropy()
         self.loss_metrics = tf.keras.metrics.Mean(name='loss')
         self.acc_metrics = tf.keras.metrics.SparseCategoricalAccuracy(name='acc')
+        log_dir = "logs/{}".format(args.name)
+        self.summary_writer = tf.summary.create_file_writer(logdir=log_dir)
+        self.summary_writer.set_as_default()
 
         # Generate the Keras Model
-        dummy_data = load_dummy(args.name)
+        dummy_data = load_dummy(args.datasetname)
         self.model = KerasModel()
         self.model(dummy_data)
         self.current_iteration = 1
@@ -41,7 +47,6 @@ class Server():
         self.test_data = load_test_dataset("cifar/test_data.h5")
 
     def iterate(self, iteration: int):
-        # weights_file_path = os.path.join("temp", args.name, "weights_server_step_{}.h5".format(iteration))
         weights_file_path = os.path.join("temp", args.name, "weights_server.h5")
         # Output weights
         self.model.save_weights(weights_file_path)
@@ -86,12 +91,16 @@ class Server():
             loss = self.loss(batch["y"], test_predictions)
             self.loss_metrics(loss)
             self.acc_metrics(batch["y"], test_predictions)
+        average_loss = self.loss_metrics.result()
+        average_acc = self.acc_metrics.result()
         print(json.dumps({
             "type": "update",
             "message": ("Test Loss: {:.5f}, Test Accuracy: {:.3f}%"
-                        .format(self.loss_metrics.result(), self.acc_metrics.result() * 100)),
+                        .format(average_loss, average_acc * 100)),
             "step": iteration
         }), flush=True)
+        tf.summary.scalar("loss", average_loss, step=iteration)
+        tf.summary.scalar("accuracy", average_acc, step=iteration)
         self.loss_metrics.reset_states()
         self.acc_metrics.reset_states()
 

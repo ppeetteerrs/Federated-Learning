@@ -5,5 +5,5 @@ cifar/
 .vscode/
 node_modules
 temp
-log
-
+datasets
+logs

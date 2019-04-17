@@ -8,7 +8,6 @@ from model import KerasModel
 from utils import load_dataset, load_dummy
 import os
 
-tf.config.gpu.set_per_process_memory_fraction(0.15)
 
 parser = argparse.ArgumentParser(description="Parse Client Arguments")
 parser.add_argument("-i", "--id", metavar='Client ID', type=int, nargs="?",
@@ -19,9 +18,13 @@ parser.add_argument("-n", "--name", metavar='Simulator Name', type=str, nargs="?
                     dest='name', help='Name of the simulator run', default="default")
 parser.add_argument("-s", "--step", metavar='Step', type=int, nargs="?",
                     dest='step', help='Step Number of the Training', default="default")
-parser.add_argument("-g", "--gpu", metavar='GPU ID', type=str, nargs="?",
-                    dest='gpu_id', help='GPU ID', default="0")
+parser.add_argument("-f", "--fraction", metavar='GPU Fraction', type=float, nargs="?",
+                    dest='gpu_fraction', help='GPU Fraction', default=0.2)
+parser.add_argument("-d", "--datasetname", metavar='Dataset Name', type=str, nargs="?",
+                    dest='datasetname', help='Name of the dataset', default="default")
 args = parser.parse_args()
+
+tf.config.gpu.set_per_process_memory_fraction(args.gpu_fraction)
 
 
 class Client():
@@ -33,11 +36,11 @@ class Client():
         self.acc_metrics = tf.keras.metrics.SparseCategoricalAccuracy(name='acc')
 
         # Generate the Keras Model
-        dummy_data = load_dummy(args.name)
+        dummy_data = load_dummy(args.datasetname)
         self.model = KerasModel()
         self.model(dummy_data)
         self.model.load_weights(args.weights_file)
-        self.dataset = load_dataset(args.name, self.id)
+        self.dataset = load_dataset(args.datasetname, self.id)
         self.datagen = iter(self.dataset)
         self.acc_gradient = None
 
@@ -77,7 +80,6 @@ class Client():
                                  for old_grad, new_grad in zip(self.acc_gradient, gradient)]
 
     def save_gradients(self):
-        # gradient_path = os.path.join("temp", args.name, "gradient_step_{}_client_{}.h5".format(args.step, self.id))
         gradient_path = os.path.join("temp", args.name, "gradient_client_{}.h5".format(self.id))
         gradient_np = [value.numpy() for value in self.acc_gradient]
         with open(gradient_path, "wb") as gradient_file:
