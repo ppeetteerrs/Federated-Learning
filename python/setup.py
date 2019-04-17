@@ -14,6 +14,9 @@ parser.add_argument("-g", "--gpu", metavar='GPU ID', type=str, nargs="?",
                     dest='gpu_id', help='GPU ID', default="0")
 args = parser.parse_args()
 
+import os
+os.environ['TF_GPU_ID'] = args.gpu_id
+
 from utils import load_h5, load_labels, separate_data_by_class, generate_client_dataset_files, load_dataset
 
 trainX, trainY = load_h5("cifar/train_data.h5")
